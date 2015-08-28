@@ -98,28 +98,28 @@ public class App {
 
 		return name;
 	}
-
+	
 	public static final JsonElement getNestedJson(JsonObject json, String key) {
-		JsonElement el = null;
-
-		String[] keys = key.split("\\.");
-
-		el = json.get(keys[0]);
-
-		if (el == null) {
-			return null;
+		String currentKey = key;
+		String rest = "";
+		int more = key.indexOf('.');
+		
+		if (more > 0 && more < key.length() - 1) {
+			currentKey = key.substring(0, more);
+			rest = key.substring(more + 1);
 		}
-
-		for (int i = 1; i < keys.length; i++) {
-			JsonObject obj = el.getAsJsonObject();
-			el = obj.get(keys[i]);
-
-			if (i < keys.length - 1 && el == null) {
-				return null;
-			}
+		
+		JsonElement el = json.get(currentKey);
+		
+		if (rest == null || rest.length() < 1) {
+			return el;
 		}
-
-		return el;
+		
+		if (el != null) {
+			return getNestedJson(el.getAsJsonObject(), rest);
+		}
+		
+		return null;
 	}
 
 	public static JsonObject fileToJSON(String fileName) {
