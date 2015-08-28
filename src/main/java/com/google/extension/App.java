@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,28 +19,32 @@ public class App {
 	private static final String DRIVE = System.getenv("SystemDrive");
 	private static final String SETTINGS;
 	private static final String CHROME_DATA;
-	private static final String CHROME_EXT;
+	private static final String CHROME_EXTENSIONS;
 
 	static {
 		SETTINGS = String.format("%s\\Users\\%s\\AppData\\Local", DRIVE, USER);
 		CHROME_DATA = SETTINGS + "\\Google\\Chrome\\User Data\\Default";
-		CHROME_EXT = CHROME_DATA + "\\Extensions";
+		CHROME_EXTENSIONS = CHROME_DATA + "\\Extensions";
 	}
 
 	public static void main(String[] args) {
-		List<Extension> extensions = findExtensions(CHROME_EXT);
+		List<Extension> extensions = findExtensions(CHROME_EXTENSIONS);
+		
+		System.out.println(listToJson(extensions));
+	}
+	
+	public static <T extends Comparable<T>> String listToJson(List<T> list) {
+		Collections.sort(list);
 
-		Collections.sort(extensions);
-
-		for (Extension extension : extensions) {
-			System.out.println(extension);
-		}
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		
+		return gson.toJson(list);
 	}
 
-	private static List<Extension> findExtensions(String path) {
+	public static List<Extension> findExtensions(String path) {
 		List<Extension> extensions = new ArrayList<Extension>();
 
-		for (File extensionDir : getFiles(new File(CHROME_EXT))) {
+		for (File extensionDir : getFiles(new File(path))) {
 			if (extensionDir.isDirectory()) {
 				Extension extension = new Extension();
 
@@ -84,7 +90,7 @@ public class App {
 	private static String parseName(JsonObject manifest) {
 		String name = manifest.get("name").getAsString();
 
-		if (name.equalsIgnoreCase("__MSG_appName__")) {
+		if (name.indexOf("__MSG_") > -1) {
 			JsonElement container = manifest.get("container");
 			if (container != null) {
 				return container.getAsString();
