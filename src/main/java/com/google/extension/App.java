@@ -22,6 +22,7 @@ public class App {
 	private static final String CHROME_EXTENSIONS;
 
 	static {
+		// @TODO CHROME_DATA = "%LocalAppData%\\Google\\Chrome\\User Data\\Default"
 		SETTINGS = String.format("%s\\Users\\%s\\AppData\\Local", DRIVE, USER);
 		CHROME_DATA = SETTINGS + "\\Google\\Chrome\\User Data\\Default";
 		CHROME_EXTENSIONS = CHROME_DATA + "\\Extensions";
