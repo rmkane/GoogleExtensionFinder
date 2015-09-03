@@ -15,30 +15,34 @@ import com.google.gson.JsonParser;
 
 public class App {
 	private static final String MANIFEST_NAME = "manifest.json";
-	private static final String USER = System.getProperty("user.name");
-	private static final String DRIVE = System.getenv("SystemDrive");
-	private static final String SETTINGS;
-	private static final String CHROME_DATA;
-	private static final String CHROME_EXTENSIONS;
+	private static final String CHROME_EXTENSIONS_DIR;
 
 	static {
-		// @TODO CHROME_DATA = "%LocalAppData%\\Google\\Chrome\\User Data\\Default"
-		SETTINGS = String.format("%s\\Users\\%s\\AppData\\Local", DRIVE, USER);
-		CHROME_DATA = SETTINGS + "\\Google\\Chrome\\User Data\\Default";
-		CHROME_EXTENSIONS = CHROME_DATA + "\\Extensions";
+		CHROME_EXTENSIONS_DIR = googleUserDataDirectory();
+	}
+
+	public static final String googleUserDataDirectory() {
+		OS os = OSUtils.getOS();
+
+		if (os != null) {
+			return OSUtils.getLocalData(os, "Google", "Chrome", "User Data",
+					"Default", "Extensions").toString();
+		}
+
+		return null;
 	}
 
 	public static void main(String[] args) {
-		List<Extension> extensions = findExtensions(CHROME_EXTENSIONS);
-		
+		List<Extension> extensions = findExtensions(CHROME_EXTENSIONS_DIR);
+
 		System.out.println(listToJson(extensions));
 	}
-	
+
 	public static <T extends Comparable<T>> String listToJson(List<T> list) {
 		Collections.sort(list);
 
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		
+
 		return gson.toJson(list);
 	}
 
@@ -105,27 +109,27 @@ public class App {
 
 		return name;
 	}
-	
+
 	public static final JsonElement getNestedJson(JsonObject json, String key) {
 		String currentKey = key;
 		String rest = "";
 		int more = key.indexOf('.');
-		
+
 		if (more > 0 && more < key.length() - 1) {
 			currentKey = key.substring(0, more);
 			rest = key.substring(more + 1);
 		}
-		
+
 		JsonElement el = json.get(currentKey);
-		
+
 		if (rest == null || rest.length() < 1) {
 			return el;
 		}
-		
+
 		if (el != null) {
 			return getNestedJson(el.getAsJsonObject(), rest);
 		}
-		
+
 		return null;
 	}
 
