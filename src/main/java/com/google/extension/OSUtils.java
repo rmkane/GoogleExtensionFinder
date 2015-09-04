@@ -21,19 +21,19 @@ public class OSUtils {
 			}
 		};
 	}
-	
+
 	public static OS getOS() {
-		if (System.getProperty("sun.desktop").equals("windows")) {
+		if (PlatformUtils.IS_WINDOWS) {
 			return getWindowsOS();
 		}
-		
+
 		return null;
 	}
-	
+
 	public static OS getWindowsOS() {
 		return WIN_VERSIONS.get(System.getProperty("os.version"));
 	}
-	
+
 	public static final Path getLocalData(OS os) {
 		Path path = new Path();
 
